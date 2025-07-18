@@ -15,7 +15,6 @@ install-deps:
     @echo "Installing Python dependencies..."
     uv pip install .
     uv pip install '.[dev]'
-    uv pip install -e . # Install project in editable mode for test imports
 
 setup-neo4j-dirs:
     @echo "Creating Neo4j data directories and setting permissions..."

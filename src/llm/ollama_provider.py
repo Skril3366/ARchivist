@@ -13,11 +13,11 @@ class OllamaProvider(LLMProvider):
     Handles communication with a local Ollama instance.
     """
 
-    def __init__(self, model_name: str = "gemma:2b", api_base_url: Optional[str] = None, **kwargs):
+    def __init__(self, model_name: str = "gemma3n:latest", api_base_url: Optional[str] = None, **kwargs):
         """Initialize the OllamaProvider.
 
         Args:
-            model_name (str): The name of the Ollama model to use (e.g., "gemma:2b").
+            model_name (str): The name of the Ollama model to use (e.g., "gemma3n:latest").
             api_base_url (Optional[str]): The base URL for the Ollama API.
                                           Defaults to OLLAMA_API_BASE_URL from config.
             **kwargs: Additional keyword arguments.
@@ -27,14 +27,20 @@ class OllamaProvider(LLMProvider):
         self.timeout = kwargs.get("timeout", 120)  # Default timeout of 120 seconds
         self._session = requests.Session()  # Use a session for connection pooling
 
-    def _make_request(self, endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _make_request(self, method: str, endpoint: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Make requests to the Ollama API.
 
         This is a helper method to handle common request logic, error handling, and JSON parsing.
         """
         url = f"{self.api_base_url}{endpoint}"
         try:
-            response = self._session.post(url, json=payload, timeout=self.timeout)
+            if method.upper() == "GET":
+                response = self._session.get(url, timeout=self.timeout)
+            elif method.upper() == "POST":
+                response = self._session.post(url, json=payload, timeout=self.timeout)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
+
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             return response.json()
         except requests.exceptions.Timeout:
@@ -71,7 +77,7 @@ class OllamaProvider(LLMProvider):
             "options": kwargs.get("options", {}),
         }
         logger.debug(f"Sending generate request to Ollama for model {self.model_name}")
-        response_data = self._make_request("/api/generate", payload)
+        response_data = self._make_request("POST", "/api/generate", payload)
         return response_data.get("response", "").strip()
 
     def generate_structured_output(self, prompt: str, schema: Dict[str, Any], **kwargs) -> Dict[str, Any]:
@@ -94,7 +100,7 @@ class OllamaProvider(LLMProvider):
             "options": kwargs.get("options", {}),
         }
         logger.debug(f"Sending structured generate request to Ollama for model {self.model_name}")
-        response_data = self._make_request("/api/generate", payload)
+        response_data = self._make_request("POST", "/api/generate", payload)
         try:
             # Ollama returns the JSON string within the "response" field
             json_string = response_data.get("response", "")
@@ -122,7 +128,7 @@ class OllamaProvider(LLMProvider):
             "options": kwargs.get("options", {}),
         }
         logger.debug(f"Sending chat completion request to Ollama for model {self.model_name}")
-        response_data = self._make_request("/api/chat", payload)
+        response_data = self._make_request("POST", "/api/chat", payload)
         return response_data.get("message", {}).get("content", "").strip()
 
     def is_available(self) -> bool:
@@ -133,26 +139,44 @@ class OllamaProvider(LLMProvider):
 
         """
         try:
-            # Check Ollama service health
-            requests.get(f"{self.api_base_url}/api/tags", timeout=5)
+            # Check if the model exists locally by making a GET request to /api/tags
+            model_tags = self._make_request("GET", "/api/tags")
             logger.info(f"Ollama service is reachable at {self.api_base_url}")
-
-            # Check if the model exists locally
-            model_tags = self._make_request("/api/tags", {})
             available_models = [m["name"] for m in model_tags.get("models", [])]
-            if self.model_name not in available_models:
-                logger.warning(f"Model '{self.model_name}' not found locally. Attempting to pull...")
-                # Attempt to pull the model
-                pull_payload = {"name": self.model_name, "stream": False}
-                pull_response = self._make_request("/api/pull", pull_payload)
-                if pull_response.get("status") == "success":
-                    logger.info(f"Successfully pulled model '{self.model_name}'.")
-                    return True
-                else:
-                    logger.error(f"Failed to pull model '{self.model_name}': {pull_response}")
-                    return False
-            logger.info(f"Model '{self.model_name}' is available.")
-            return True
+            if self.model_name in available_models:
+                logger.info(f"Model '{self.model_name}' is already available.")
+                return True
+
+            logger.warning(f"Model '{self.model_name}' not found locally. Attempting to pull...")
+            # Attempt to pull the model, handling the streaming response
+            pull_url = f"{self.api_base_url}/api/pull"
+            pull_payload = {"name": self.model_name, "stream": True}  # Request streaming
+            pull_success = False
+            try:
+                with self._session.post(pull_url, json=pull_payload, stream=True, timeout=self.timeout) as response:
+                    response.raise_for_status()
+                    for line in response.iter_lines():
+                        if line:
+                            try:
+                                json_response = json.loads(line)
+                                if json_response.get("status") == "success":
+                                    pull_success = True
+                                    logger.info(f"Successfully pulled model '{self.model_name}'.")
+                                elif json_response.get("error"):
+                                    logger.error(
+                                        f"Error pulling model '{self.model_name}': {json_response.get('error')}"
+                                    )
+                                    pull_success = False
+                                    break  # Exit loop on error
+                                else:
+                                    logger.debug(f"Pull progress for {self.model_name}: {json_response.get('status')}")
+                            except json.JSONDecodeError:
+                                logger.warning(f"Received non-JSON line during pull: {line}")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request error during model pull for '{self.model_name}': {e}")
+                pull_success = False
+
+            return pull_success
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
             logger.error(f"Ollama service or model check failed: {e}")
             return False
@@ -170,7 +194,7 @@ class OllamaProvider(LLMProvider):
         try:
             # Ollama doesn't have a direct "get model info" endpoint for a specific model
             # without running it. We can list all models and find ours.
-            model_tags = self._make_request("/api/tags", {})
+            model_tags = self._make_request("GET", "/api/tags")
             for model in model_tags.get("models", []):
                 if model.get("name") == self.model_name:
                     return model

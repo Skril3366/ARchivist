@@ -1,7 +1,36 @@
 [project]
 name = "archivist"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python application to analyze Telegram chat exports using local AI and Neo4j."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "neo4j",
+    "requests",
+    "pydantic",
+    "click",
+    "python-dotenv",
+    "loguru",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-ini"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "D"] # Error, Flake8, Warning, Isort, Naming, Docstrings
+ignore = ["D100", "D104", "D107", "D203", "D213"] # Ignore missing docstrings for modules, packages, and __init__, and conflicting docstring rules
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false

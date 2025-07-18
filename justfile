@@ -22,6 +22,7 @@ setup-neo4j-dirs:
     mkdir -p data/neo4j/import
     mkdir -p data/neo4j/logs
     mkdir -p data/neo4j/plugins
+    mkdir -p data # Ensure data directory for telegram_dump.json exists
     # Grant full permissions for development to avoid Docker permission issues.
     # For production, consider more restrictive permissions and chown to UID/GID 7474.
     chmod -R 777 data
@@ -48,8 +49,8 @@ hello:
     @echo "Running hello command..."
     uv run python "{{PYTHON_MAIN}}" hello
 
-analyze CHAT_EXPORT_PATH:
-    @echo "Running analyze command for $(CHAT_EXPORT_PATH)..."
+analyze *CHAT_EXPORT_PATH:
+    @echo "Running analyze command..."
     uv run python "{{PYTHON_MAIN}}" analyze {{CHAT_EXPORT_PATH}}
 
 query QUERY_TEXT:

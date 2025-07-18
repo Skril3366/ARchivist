@@ -38,6 +38,7 @@
 - Handle both string and array formats for text fields
 - Add comprehensive error handling for malformed JSON or missing fields
 - Include progress tracking capabilities
+- **The parser should be able to read from `data/telegram_dump.json` by default, or from a path specified by the user via CLI.**
 
 **Verification:** Parser can load sample Telegram JSON files, iterate through messages, and handle various text formats correctly
 
@@ -103,7 +104,6 @@
 - Add `docker-compose.yml` for Neo4j container with proper volumes and authentication
 - Implement connection management with retry logic and health checks
 - Add methods for creating/updating user nodes with dynamic properties
-- Implement batch operations for efficient bulk updates
 - Include index creation for common query patterns
 - Add transaction support for atomic operations
 - Create database initialization scripts for constraints and indexes

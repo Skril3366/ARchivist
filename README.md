@@ -151,9 +151,16 @@ All common commands are available via the `just` command runner.
     just hello
     ```
 
-*   **Analyze a chat export (placeholder):**
+*   **Analyze a chat export:**
+    By default, the `analyze` command looks for `data/telegram_dump.json`.
     ```bash
-    just analyze /path/to/your/telegram_chat.json
+    # Analyze the default file: data/telegram_dump.json
+    just analyze
+    ```
+    You can also specify a custom path:
+    ```bash
+    # Analyze a specific file
+    just analyze /path/to/your/custom_telegram_export.json
     ```
 
 *   **Query analyzed data (placeholder):**
@@ -223,7 +230,7 @@ telegram-analyzer/
 │   └── llm/             # LLM provider abstraction
 ├── tests/               # Comprehensive test suite
 ├── docs/                # Documentation and examples
-├── data/                # Persistent data for Neo4j
+├── data/                # Persistent data for Neo4j and default Telegram dump location
 ├── logs/                # Application logs
 ├── scripts/             # Helper scripts (e.g., Git hooks)
 │   └── pre-commit.sh    # Custom pre-commit hook script

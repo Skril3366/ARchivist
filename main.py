@@ -23,9 +23,22 @@ def hello():
 
 
 @cli.command()
-@click.argument("chat_export_path", type=click.Path(exists=True))
+@click.argument("chat_export_path", type=click.Path(exists=True), required=False)
 def analyze(chat_export_path):
-    """Analyze a Telegram chat export JSON file."""
+    """Analyze a Telegram chat export JSON file.
+
+    If CHAT_EXPORT_PATH is not provided, it defaults to 'data/telegram_dump.json'.
+    """
+    if not chat_export_path:
+        chat_export_path = "data/telegram_dump.json"
+        logger.info(f"No chat export path provided, defaulting to {chat_export_path}")
+        # Check if the default file exists
+        if not click.Path(exists=True).convert(chat_export_path, None, None):
+            logger.error(f"Default chat export file not found: {chat_export_path}")
+            click.echo(f"Error: Default chat export file not found at '{chat_export_path}'.")
+            click.echo("Please place your Telegram dump at this location or specify the path as an argument.")
+            return
+
     logger.info(f"Analyzing chat export: {chat_export_path}")
     click.echo(f"Starting analysis of {chat_export_path}...")
     # Placeholder for analysis logic

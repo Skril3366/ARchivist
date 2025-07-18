@@ -15,6 +15,7 @@ install-deps:
     @echo "Installing Python dependencies..."
     uv pip install .
     uv pip install '.[dev]'
+    uv pip install -e . # Install project in editable mode for test imports
 
 setup-neo4j-dirs:
     @echo "Creating Neo4j data directories and setting permissions..."
@@ -68,11 +69,15 @@ test:
 
 lint:
     @echo "Running linter (ruff check)..."
-    uv run ruff check src/ main.py
+    uv run ruff check src/ main.py tests/
+
+fix:
+    @echo "Running linter (ruff check --fix)..."
+    uv run ruff check src/ main.py tests/ --fix
 
 format:
     @echo "Running formatter (ruff format)..."
-    uv run ruff format src/ main.py
+    uv run ruff format src/ main.py tests/ # Added tests/ to the format command
 
 # Clean command
 clean:

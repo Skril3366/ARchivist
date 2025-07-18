@@ -20,7 +20,8 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--strict-markers --strict-ini"
+addopts = "--strict-markers"
+pythonpath = ["."] # Add current directory to Python path for imports
 
 [tool.ruff]
 line-length = 120
@@ -28,7 +29,7 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "D"] # Error, Flake8, Warning, Isort, Naming, Docstrings
-ignore = ["D100", "D104", "D107", "D203", "D213"] # Ignore missing docstrings for modules, packages, and __init__, and conflicting docstring rules
+ignore = ["D100", "D103", "D104", "D107", "D203", "D213", "N999"] # Ignore missing docstrings for modules, packages, and __init__, and conflicting docstring rules, and N999 for __init__.py module name
 
 [tool.ruff.format]
 quote-style = "double"

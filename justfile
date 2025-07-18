@@ -57,6 +57,10 @@ analyze-sample:
     @echo "Running analyze command with sample data..."
     uv run python "{{PYTHON_MAIN}}" analyze data/sample_telegram_dump.json
 
+reset-state:
+    @echo "Resetting processing state..."
+    uv run python "{{PYTHON_MAIN}}" reset-state
+
 query QUERY_TEXT:
     @echo "Running query command for '$(QUERY_TEXT)'..."
     uv run python "{{PYTHON_MAIN}}" query "{{QUERY_TEXT}}"
@@ -79,6 +83,4 @@ clean:
     @echo "Cleaning up generated files and directories..."
     rm -rf __pycache__/ .pytest_cache/ .ruff_cache/ logs/ uv.lock
     rm -rf data/neo4j/data data/neo4j/import data/neo4j/logs data/neo4j/plugins
-    rm -f data/telegram_dump.json # Remove default dump file
-    rm -f data/sample_telegram_dump.json # Remove sample dump file
     @echo "Cleanup complete."

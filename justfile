@@ -53,10 +53,6 @@ analyze *CHAT_EXPORT_PATH:
     @echo "Running analyze command..."
     uv run python "{{PYTHON_MAIN}}" analyze {{CHAT_EXPORT_PATH}}
 
-analyze-sample:
-    @echo "Running analyze command with sample data..."
-    uv run python "{{PYTHON_MAIN}}" analyze data/sample_telegram_dump.json
-
 reset-state:
     @echo "Resetting processing state..."
     uv run python "{{PYTHON_MAIN}}" reset-state

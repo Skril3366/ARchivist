@@ -12,20 +12,13 @@ The Telegram Chat Analyzer is a Python application that processes Telegram chat 
 - **Extraction:** Uses AI to identify user facts like names, locations, interests, and other relevant attributes
 - **Storage:** Stores extracted information as graph nodes and relationships in Neo4j
 
-### Key Features
-- **Resumable Processing:** Can interrupt and resume large chat analysis without losing progress
-- **Contextual Understanding:** Uses surrounding messages and reply chains for better fact extraction
-- **Dynamic Schema:** Automatically discovers new user attributes while avoiding duplicates
-- **Natural Language Queries:** Ask questions in plain English, get structured answers
-- **Local Processing:** All AI processing happens locally using Ollama, no external API calls
-
 ## Technical Architecture
 
 ### Components
 - **Message Parser:** Handles Telegram JSON format with robust error handling
 - **Context Manager:** Implements sliding window for gathering relevant message context
-- **Fact Extractor:** AI-powered extraction of structured user information
-- **Graph Database:** Neo4j storage for users, attributes, and relationships
+- **Fact Extractor:** AI-powered extraction of structured user information. **This component will be responsible for fetching existing user facts from the Neo4j database and providing them to the LLM's context to avoid redundant extractions.**
+- **Graph Database:** Neo4j storage for users, attributes, and relationships. **This component will provide methods for both reading existing user facts and writing newly extracted facts, ensuring data integrity and preventing duplicates.**
 - **Query Engine:** Natural language to Cypher translation for database queries
 - **State Management:** Persistent processing state for resumable operations
 

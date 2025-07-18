@@ -38,7 +38,7 @@
 - Handle both string and array formats for text fields
 - Add comprehensive error handling for malformed JSON or missing fields
 - Include progress tracking capabilities
-- **The parser should be able to read from `data/telegram_dump.json` by default, or from a path specified by the user via CLI.**
+- The parser should be able to read from `data/telegram_dump.json` by default, or from a path specified by the user via CLI.
 
 **Verification:** Parser can load sample Telegram JSON files, iterate through messages, and handle various text formats correctly
 
@@ -88,13 +88,14 @@
 
 **Details:**
 - Create `extraction/fact_extractor.py` with UserFactExtractor class
-- Implement method to analyze message context and extract structured facts
-- Add semantic similarity checking to avoid duplicate attributes
-- Include confidence scoring for extracted facts
-- Implement fact merging logic for combining information from multiple messages
-- Add validation to ensure extracted facts match expected schema
+- Implement method to analyze message context and extract structured facts.
+- **Before extracting new facts for a user, read existing facts for that user from the Neo4j database and provide them to the LLM's context to prevent duplicate extractions.**
+- Add semantic similarity checking to avoid duplicate attributes.
+- Include confidence scoring for extracted facts.
+- Implement fact merging logic for combining information from multiple messages.
+- Add validation to ensure extracted facts match expected schema.
 
-**Verification:** Fact extractor can process message contexts and return structured, deduplicated user facts
+**Verification:** Fact extractor can process message contexts, leverage existing facts to avoid duplicates, and return structured, deduplicated user facts.
 
 ## Task 8: Neo4j Database Interface
 **Objective:** Create database layer for storing and retrieving user facts in Neo4j with Docker integration.
@@ -103,12 +104,14 @@
 - Create `database/neo4j_interface.py` with Neo4jManager class
 - Add `docker-compose.yml` for Neo4j container with proper volumes and authentication
 - Implement connection management with retry logic and health checks
-- Add methods for creating/updating user nodes with dynamic properties
+- Add methods for creating/updating user nodes with dynamic properties.
+- **Implement methods to read existing facts for a given user from the database.**
+- **Implement methods to write newly extracted facts to the database, ensuring they are linked to the correct user and avoiding duplicates at the database level.**
 - Include index creation for common query patterns
 - Add transaction support for atomic operations
 - Create database initialization scripts for constraints and indexes
 
-**Verification:** Database interface can connect to dockerized Neo4j, create/update nodes, and handle connection failures gracefully
+**Verification:** Database interface can connect to dockerized Neo4j, create/update nodes, read existing facts, write new facts without duplication, and handle connection failures gracefully
 
 ## Task 9: Natural Language Query System
 **Objective:** Implement natural language to Cypher query translation and execution.

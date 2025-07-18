@@ -9,7 +9,7 @@ The Telegram Chat Analyzer is a Python application that processes Telegram chat 
 ### Data Processing
 - **Input:** Telegram chat JSON exports containing message history
 - **Processing:** Analyzes messages using sliding window context to understand conversations
-- **Extraction:** Uses AI to identify user facts like names, locations, interests, and other relevant attributes
+- **Extraction:** Uses AI to identify user facts like names, locations, interests, and other relevant attributes. **It also reads existing facts from the database to avoid extracting duplicates and writes newly extracted facts back to the database.**
 - **Storage:** Stores extracted information as graph nodes and relationships in Neo4j
 
 ### Key Features
@@ -24,8 +24,8 @@ The Telegram Chat Analyzer is a Python application that processes Telegram chat 
 ### Components
 - **Message Parser:** Handles Telegram JSON format with robust error handling
 - **Context Manager:** Implements sliding window for gathering relevant message context
-- **Fact Extractor:** AI-powered extraction of structured user information
-- **Graph Database:** Neo4j storage for users, attributes, and relationships
+- **Fact Extractor:** AI-powered extraction of structured user information. **Integrates with the database to fetch existing facts for a user before extraction to prevent duplicates.**
+- **Graph Database:** Neo4j storage for users, attributes, and relationships. **Provides capabilities to read existing user facts and write new ones.**
 - **Query Engine:** Natural language to Cypher translation for database queries
 - **State Management:** Persistent processing state for resumable operations
 

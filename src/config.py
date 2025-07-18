@@ -21,7 +21,7 @@ def setup_logging():
     # Ensure logs directory exists before configuring logger to write to it
     os.makedirs("logs", exist_ok=True)
 
-    # Add file handler
+    # Add file handler (all INFO messages and above go to file)
     logger.add(
         "logs/file_{time}.log",
         rotation="10 MB",
@@ -30,15 +30,14 @@ def setup_logging():
         format="{time} {time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {file}:{line: <4} | {message}",
         enqueue=True,  # Use a queue for logging to avoid blocking
     )
-    # Add console handler for real-time feedback
+    # Add console handler (only ERROR messages and above go to console)
     logger.add(
-        sys.stderr, level="INFO", format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {file}:{line: <4} | {message}"
+        sys.stderr, level="ERROR", format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {file}:{line: <4} | {message}"
     )
-    logger.info("Logger initialized.")
-
-    # Log configuration details after logger is set up
-    logger.info(f"Neo4j URI: {NEO4J_URI}")
-    logger.info(f"Ollama API Base URL: {OLLAMA_API_BASE_URL}")
+    # Removed specific info logs from here, as they will now only appear in the file log
+    # logger.info("Logger initialized.")
+    # logger.info(f"Neo4j URI: {NEO4J_URI}")
+    # logger.info(f"Ollama API Base URL: {OLLAMA_API_BASE_URL}")
 
 
 # Database Configuration

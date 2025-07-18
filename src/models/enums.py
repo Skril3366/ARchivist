@@ -27,6 +27,10 @@ class EntityType(str, Enum):
     EMAIL = "email"
     CASHTAG = "cashtag"
     BOT_COMMAND = "bot_command"
+    LINK = "link"
+    TEXT_LINK = "text_link"
+    BLOCKQUOTE = "blockquote"  # Added from provided data
+    MENTION_NAME = "mention_name"  # Added from provided data
 
 
 class ActionType(str, Enum):
@@ -39,6 +43,13 @@ class ActionType(str, Enum):
     PIN_MESSAGE = "pin_message"
     CREATE_GROUP = "create_group"
     CREATE_CHANNEL = "create_channel"
-    EDIT_MESSAGE = "edit_message"  # Not explicitly in TELEGRAM_MESSAGE_STRUCTURE.md but common
-    DELETE_MESSAGE = "delete_message"  # Not explicitly in TELEGRAM_MESSAGE_STRUCTURE.md but common
-    # Add other service actions as discovered
+    EDIT_MESSAGE = "edit_message"
+    DELETE_MESSAGE = "delete_message"
+    MIGRATE_FROM_GROUP = "migrate_from_group"
+    TOPIC_CREATED = "topic_created"
+    JOIN_GROUP_BY_LINK = "join_group_by_link"
+    BOOST_APPLY = "boost_apply"  # Added from provided data
+    EDIT_GROUP_PHOTO = "edit_group_photo"  # Added from provided data
+    EDIT_GROUP_TITLE = "edit_group_title"  # Added from provided data
+    GROUP_CALL = "group_call"  # Added from provided data
+    REMOVE_MEMBERS = "remove_members"  # Added from provided data

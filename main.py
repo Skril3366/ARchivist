@@ -1,6 +1,7 @@
 import click
 
 from src.config import logger, setup_logging
+from src.parsers.telegram_parser import TelegramChatParser
 
 
 @click.group()
@@ -41,7 +42,23 @@ def analyze(chat_export_path):
 
     logger.info(f"Analyzing chat export: {chat_export_path}")
     click.echo(f"Starting analysis of {chat_export_path}...")
-    # Placeholder for analysis logic
+
+    try:
+        parser = TelegramChatParser(chat_export_path)
+        chat = parser.load_and_validate()
+        click.echo(f"Successfully loaded chat: '{chat.name}' with {len(chat.messages)} messages.")
+
+        # Iterate through all messages
+        for i, message in enumerate(parser.get_messages()):
+            logger.info(f"Processing message {message.id} (Type: {message.type}) from {message.from_name}")
+
+    except FileNotFoundError:
+        # Error message already logged by the CLI argument check or parser
+        pass
+    except Exception as e:
+        logger.error(f"An error occurred during analysis: {e}")
+        click.echo("An error occurred during analysis. Check logs for details.")
+
     click.echo("Analysis complete (placeholder).")
 
 
